@@ -17,8 +17,9 @@
  along with this program; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 """
-import ConfigParser
+import configparser
 from utils import DDNSUtils
+
 
 class LocalDomainRecord(object):
     def __init__(self, parser, section):
@@ -37,9 +38,10 @@ class LocalDomainRecord(object):
         except:
             pass
 
+
 class DDNSConfig(object):
-    def __init__(self, configFile):
-        self.configFile = configFile
+    def __init__(self, configfile):
+        self.configFile = configfile
 
         # default options
         self.debug = False
@@ -50,8 +52,8 @@ class DDNSConfig(object):
         # local domain record list
         self.localDomainRecordList = []
 
-        self.configParser = ConfigParser.ConfigParser()
-        self.configParser.read(configFile)
+        self.configParser = configparser.ConfigParser()
+        self.configParser.read(configfile)
 
         self.parseDefaultOptions()
         self.parseDomainRecords()
@@ -70,7 +72,7 @@ class DDNSConfig(object):
         try:
             self.accessId = self.configParser.get("DEFAULT", "access_id")
             self.accessKey = self.configParser.get("DEFAULT", "access_key")
-        except Exception,e:
+        except Exception as e:
             pass
 
     def validate(self):

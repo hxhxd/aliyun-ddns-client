@@ -28,7 +28,7 @@ class DDNSHelper(object):
 
     def getRemoteDomainRecordList(self, domain):
         if not domain:
-            DDNSUtils.err("getDomainReordId: You must specify domain name.")
+            DDNSUtils.err("getDomainRecordId: You must specify domain name.")
             return None
 
         # try get domain record id
@@ -58,7 +58,7 @@ class DDNSHelper(object):
         id = None
         try:
             id = recordInfo['RecordId']
-        except Exception,e:
+        except Exception as e:
             DDNSUtils.err("Failed to get domain record id from {0}".format(recordInfo))
             DDNSUtils.err("Exception:\n{0}".format(e))
 
@@ -68,7 +68,7 @@ class DDNSHelper(object):
         value = None
         try:
             value = recordInfo['Value']
-        except Exception,e:
+        except Exception as e:
             DDNSUtils.err("Failed to get domain record value from {0}".format(recordInfo))
             DDNSUtils.err("Exception:\n{0}".format(e))
 

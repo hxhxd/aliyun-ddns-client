@@ -18,12 +18,14 @@
  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 """
 import requests
-import string
+#import string
 import urllib
+from urllib import parse
 import hashlib
 import hmac
 import uuid
 from datetime import datetime
+
 
 class DomainRecord(object):
     def __init__(self, domainRecord):
@@ -39,17 +41,18 @@ class DomainRecord(object):
         self.locked = False
 
         # convert json record key name to lowercased one
-        convertedDomainRecord = dict(zip(map(string.lower,domainRecord.keys()),domainRecord.values()))
+        convertedDomainRecord = dict(zip(map(str.lower, domainRecord.keys()), domainRecord.values()))
         try:
             for k in convertedDomainRecord.keys():
                 self.__dict__[k] = convertedDomainRecord[k]
-        except Exception,e:
-            print "Failed to initiate DomainRecord object, no %s definition in DomainRecord" % k
+        except Exception as e:
+            print("Failed to initiate DomainRecord object, no %s definition in DomainRecord" % k)
             raise e
+
 
 class YunResolver(object):
     def __init__(self, accessId, accessKey, debug):
-        self.url = "http://dns.aliyuncs.com/"
+        self.url = "https://dns.aliyuncs.com/"
         self.accessKeyId = accessId
         self.hashKey = accessKey + '&'
         self.debug = debug
@@ -59,7 +62,7 @@ class YunResolver(object):
         ISO8601 standard: YYYY-MM-DDThh:mm:ssZ, e,g:2015-0109T12:00:00Z (UTC Timezone)
         @return string
         """
-        return  datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+        return datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
 
     def getSignatureNonce(self):
         """
@@ -86,14 +89,14 @@ class YunResolver(object):
         """
         def percentEncode(str):
             str = str.encode("utf8")
-            return urllib.quote_plus(str).replace("+", "%20").replace("*", "%2A").replace("%7E", "~")
+            return urllib.parse.quote_plus(str).replace("+", "%20").replace("*", "%2A").replace("%7E", "~")
 
         params.update(self.getCommonParams())
         sortedParams = sorted(params.items())
 
         # get Canonicalized Query String
         canonString = ""
-        for k,v in sortedParams:
+        for k, v in sortedParams:
             canonString += "&" + percentEncode(k) + "=" + percentEncode(v)
 
         # format string for sign
@@ -113,8 +116,8 @@ class YunResolver(object):
         """
         params.update(self.getCommonParams())
         sortedParams = sorted(params.items())
-        canonString = urllib.urlencode(sortedParams)
-        signString = httpMethod + "&" + urllib.quote_plus("/") + "&" + urllib.quote_plus(canonString)
+        canonString = urllib.parse.urlencode(sortedParams)
+        signString = httpMethod + "&" + urllib.parse.quote_plus("/") + "&" + urllib.parse.quote_plus(canonString)
 
         # hmac sha1 algrithm
         hashValue = hmac.new(self.hashKey, signString, hashlib.sha1).digest()
@@ -156,12 +159,16 @@ class YunResolver(object):
             r = requests.get(self.url, params=params)
             if r.status_code == requests.codes.ok:
                 jsonResult = r.json()
-        except Exception,e:
-            print r.content
+            else:
+                # print the returned error message
+                print ("Http Status Code:%s\n%s" % (r.status_code, r.json()['Message']))
+
+        except Exception as e:
+            print(r.content)
             raise e
 
         if not jsonResult:
-            print "Failed to get valid Domain Records Info"
+            print("Failed to get valid Domain Records Info")
             return []
 
         domainRecordList = []
@@ -170,7 +177,7 @@ class YunResolver(object):
             for rec in records:
                 #dr = DomainRecord(rec)
                 domainRecordList.append(rec)
-        except Exception,e:
+        except Exception as e:
             raise e
 
         return domainRecordList
@@ -190,20 +197,20 @@ class YunResolver(object):
         if ttl:
             validTTLs = [600, 1800, 3600, 43200, 86400]
             if ttl not in validTTLs:
-                print "TTL is not a valid value, it need to be one of them: %s" % validTTLs
+                print("TTL is not a valid value, it need to be one of them: %s" % validTTLs)
                 return False
             optionalParams['TTL'] = ttl
 
         if priority:
             validPriorities = range(1,11)
             if priority not in validPriorities:
-                print "Priority is not a valid value, it need to be one of them: %s" % validPriorities
+                print("Priority is not a valid value, it need to be one of them: %s" % validPriorities)
             optionalParams['Priority'] = priority
 
         if line:
             validLines = ['default', 'telecom', 'unicom', 'mobile', 'oversea', 'edu', 'google', 'baidu', 'biying']
             if line not in validLines:
-                print "Line is not a valid value, it need to be one of them: %s" % validLines
+                print("Line is not a valid value, it need to be one of them: %s" % validLines)
                 return False
             optionalParams['Line']= line
 
@@ -215,10 +222,10 @@ class YunResolver(object):
         try:
             r = requests.get(self.url, params=params)
             if r.status_code != requests.codes.ok:
-                print "Http Status Code:%s\n%s" % (r.status_code, r.content)
+                print("Http Status Code:%s\n%s" % (r.status_code, r.content))
                 return False
-        except Exception,e:
-            print r.content
+        except Exception as e:
+            print(r.content)
             raise e
 
         return True
@@ -237,12 +244,12 @@ class YunResolver(object):
         try:
             r = requests.get(self.url, params=params)
             if r.status_code != requests.codes.ok:
-                print "Http Status Code:%s\n%s" % (r.status_code, r.content)
+                print("Http Status Code:%s\n%s" % (r.status_code, r.content))
                 return False
 
             jsonResult = r.json()
-        except Exception,e:
-            print r.content
+        except Exception as e:
+            print(r.content)
             raise e
 
         return jsonResult

@@ -39,7 +39,7 @@ if __name__ == "__main__":
     for localRecord in config.localDomainRecordList:
         # if we don't have domain record's id in config file, then we never sync to server before
         if not localRecord.id or not localRecord.value:
-            result = helper.syncFirstTime(localRecord,currentPublicIP)
+            result = helper.syncFirstTime(localRecord, currentPublicIP)
             if result is False:
                 DDNSUtils.err_and_exit("Failed doing the first time sync for record:{0}".format(localRecord.alias))
                 continue

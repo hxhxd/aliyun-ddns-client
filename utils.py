@@ -55,7 +55,7 @@ class DDNSUtils:
                     self.info("Http Status Code:{0}\n{1}".format(r.status_code, r.content))
                 else:
                     self.err("Failed to get current public IP, pls check network settings")
-        except Exception,e:
+        except Exception as e:
             self.err("network problem:{0}".format(e))
 
         return ip
@@ -68,7 +68,7 @@ class DDNSUtils:
         ip = None
         try:
             ip = socket.gethostbyname("{0}.{1}".format(subDomainName,domainName))
-        except Exception,e:
+        except Exception as e:
             self.err("network problem:{0}".format(e))
 
         return ip
